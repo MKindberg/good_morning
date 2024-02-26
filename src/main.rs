@@ -4,8 +4,7 @@ mod openhab;
 mod sonos;
 
 use std::{
-    fs::File,
-    io::{BufRead, BufReader, Read},
+    io::{BufRead, BufReader},
     net::{TcpListener, TcpStream},
     thread,
     time::Duration,
@@ -17,15 +16,15 @@ use tokio::task::JoinHandle;
 #[tokio::main]
 async fn main() {
     let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
-    let config = config::Config::new();
-    dbg!(config);
-    return;
+    println!("Listening on port 7878");
 
     let mut thread_handle: Option<JoinHandle<()>> = None;
     for stream in listener.incoming() {
         if let Some(handle) = &thread_handle {
-            println!("Aborting current alarm");
-            handle.abort();
+            if !handle.is_finished() {
+                println!("Aborting current alarm");
+                handle.abort();
+            }
         }
         let stream = stream.unwrap();
 
