@@ -25,6 +25,14 @@ pub struct Items {
 pub struct Sonos {
     pub ips: Vec<String>,
     pub volume: u16,
+    pub alarm: SonosAlarm,
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct SonosAlarm {
+    pub room_uuid: String,
+    pub program_uri: String,
+    pub program_meta_data: String,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]

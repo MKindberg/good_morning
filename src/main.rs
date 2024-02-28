@@ -30,6 +30,16 @@ async fn main() {
 
         if let Some(time) = parse_http(stream) {
             println!("Schedule new alarm for {}", &time);
+            let config = config::Config::new();
+
+            let speakers = sonos::Sonos::new(
+                config.items.sonos.ips.as_slice(),
+                config.items.sonos.volume,
+                config.items.sonos.alarm,
+            )
+            .await;
+            speakers.join().await;
+            speakers.set_alarm(&time).await;
             let mut scheduler = AsyncScheduler::new();
             scheduler
                 .every(1.day())
@@ -51,18 +61,14 @@ async fn main() {
 async fn trigger_alarm() {
     println!("Alarm triggered");
     let config = config::Config::new();
-
-    let speakers =
-        sonos::Sonos::new(config.items.sonos.ips.as_slice(), config.items.sonos.volume).await;
     let oh_items = config
         .items
         .openhab
         .iter()
         .map(|i| openhab::Item::new(&i.name, &i.value));
 
-    speakers.join().await;
-    speakers.set_volume().await;
-    speakers.play().await;
+    // speakers.set_volume().await;
+    // speakers.play().await;
 
     thread::sleep(Duration::from_secs(60 * 2));
 
