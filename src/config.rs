@@ -6,8 +6,8 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Config {
-        let config = std::fs::read_to_string(std::env::args().nth(1).unwrap()).unwrap();
+    pub fn new(config_file: &str) -> Config {
+        let config = std::fs::read_to_string(config_file).unwrap();
         serde_yaml::from_str(&config).unwrap()
     }
 }

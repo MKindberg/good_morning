@@ -1,6 +1,7 @@
 #![feature(async_closure)]
 mod config;
 mod openhab;
+mod settings;
 mod sonos;
 
 use std::{
@@ -15,8 +16,10 @@ use tokio::task::JoinHandle;
 
 #[tokio::main]
 async fn main() {
-    let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
-    println!("Listening on port 7878");
+    let settings = settings::Settings::new();
+
+    let listener = TcpListener::bind(&format!("0.0.0.0:{}", settings.port)).unwrap();
+    println!("Listening on port {}", settings.port);
 
     let mut thread_handle: Option<JoinHandle<()>> = None;
     for stream in listener.incoming() {
@@ -30,7 +33,7 @@ async fn main() {
 
         if let Some(time) = parse_http(stream) {
             println!("Schedule new alarm for {}", &time);
-            let config = config::Config::new();
+            let config = config::Config::new(&settings.config_file);
 
             let speakers = sonos::Sonos::new(
                 config.items.sonos.ips.as_slice(),
@@ -60,7 +63,8 @@ async fn main() {
 
 async fn trigger_alarm() {
     println!("Alarm triggered");
-    let config = config::Config::new();
+    let settings = settings::Settings::new();
+    let config = config::Config::new(&settings.config_file);
     let oh_items = config
         .items
         .openhab
