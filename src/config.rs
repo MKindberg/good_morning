@@ -7,10 +7,7 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Config {
-        let config = std::fs::read_to_string(
-            std::env::var("HOME").unwrap() + "/.config/good_morning/items.yaml",
-        )
-        .unwrap();
+        let config = std::fs::read_to_string(std::env::args().nth(1).unwrap()).unwrap();
         serde_yaml::from_str(&config).unwrap()
     }
 }
