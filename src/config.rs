@@ -2,7 +2,8 @@ use serde::Deserialize;
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct Config {
-    pub items: Items,
+    pub sonos: Sonos,
+    pub openhab: Vec<Openhab>,
 }
 
 impl Config {
@@ -10,12 +11,6 @@ impl Config {
         let config = std::fs::read_to_string(config_file).unwrap();
         serde_yaml::from_str(&config).unwrap()
     }
-}
-
-#[derive(Deserialize, PartialEq, Debug)]
-pub struct Items {
-    pub sonos: Sonos,
-    pub openhab: Vec<Openhab>,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]

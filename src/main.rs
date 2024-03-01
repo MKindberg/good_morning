@@ -36,9 +36,9 @@ async fn main() {
             let config = config::Config::new(&settings.config_file);
 
             let speakers = sonos::Sonos::new(
-                config.items.sonos.ips.as_slice(),
-                config.items.sonos.volume,
-                config.items.sonos.alarm,
+                config.sonos.ips.as_slice(),
+                config.sonos.volume,
+                config.sonos.alarm,
             )
             .await;
             speakers.join().await;
@@ -66,7 +66,6 @@ async fn trigger_alarm() {
     let settings = settings::Settings::new();
     let config = config::Config::new(&settings.config_file);
     let oh_items = config
-        .items
         .openhab
         .iter()
         .map(|i| openhab::Item::new(&i.name, &i.value));
