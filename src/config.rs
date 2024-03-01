@@ -8,8 +8,8 @@ pub struct Config {
 
 impl Config {
     pub fn new(config_file: &str) -> Config {
-        let config = std::fs::read_to_string(config_file).unwrap();
-        serde_yaml::from_str(&config).unwrap()
+        let config = std::fs::read_to_string(config_file).expect("Could not read config file");
+        serde_yaml::from_str(&config).expect("Could not parse config file")
     }
 }
 

@@ -18,7 +18,7 @@ use tokio::task::JoinHandle;
 async fn main() {
     let settings = settings::Settings::new();
 
-    let listener = TcpListener::bind(&format!("0.0.0.0:{}", settings.port)).unwrap();
+    let listener = TcpListener::bind(&format!("0.0.0.0:{}", settings.port)).expect("Could not bind to port");
     println!("Listening on port {}", settings.port);
 
     let mut thread_handle: Option<JoinHandle<()>> = None;

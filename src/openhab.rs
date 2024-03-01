@@ -20,6 +20,6 @@ impl Item {
             .body(self.state.clone())
             .send()
             .await
-            .unwrap();
+            .expect("Failed to send command to OpenHAB");
     }
 }

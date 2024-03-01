@@ -12,7 +12,7 @@ impl Sonos {
     pub async fn new(ips: &[String], volume: u16, alarm_data: SonosAlarm) -> Sonos {
         let mut speakers = Vec::new();
         for ip in ips {
-            let ip = Ipv4Addr::from_str(ip).unwrap();
+            let ip = Ipv4Addr::from_str(ip).expect("Failed to parse sonos IP");
             let s = Speaker::new(ip).await;
             println!("Connected to {}", s.name);
             speakers.push(s);
@@ -50,8 +50,9 @@ impl Sonos {
             .speaker
             .action(&service, aaction, &args)
             .await
-            .unwrap();
+            .expect("Failed to set alarm");
     }
+
     pub async fn play(&self) {
         for speaker in &self.speakers {
             println!("Playing on {}", speaker.name);
@@ -65,7 +66,7 @@ impl Sonos {
 
     pub async fn set_volume(&self) {
         for speaker in &self.speakers {
-            speaker.speaker.set_volume(self.volume).await.unwrap();
+            speaker.speaker.set_volume(self.volume).await.expect("Failed to set volume");
         }
     }
 
