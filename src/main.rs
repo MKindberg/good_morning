@@ -18,29 +18,31 @@ use tokio::task::JoinHandle;
 async fn main() {
     let settings = settings::Settings::new();
 
-    let listener = TcpListener::bind(&format!("0.0.0.0:{}", settings.port)).expect("Could not bind to port");
+    let listener =
+        TcpListener::bind(&format!("0.0.0.0:{}", settings.port)).expect("Could not bind to port");
     println!("Listening on port {}", settings.port);
 
     let mut thread_handle: Option<JoinHandle<()>> = None;
     for stream in listener.incoming() {
+        let config = config::Config::new(&settings.config_file);
+        let speakers = sonos::Sonos::new(
+            config.sonos.ips.as_slice(),
+            config.sonos.volume,
+            config.sonos.alarm,
+        )
+        .await;
         if let Some(handle) = &thread_handle {
             if !handle.is_finished() {
                 println!("Aborting current alarm");
                 handle.abort();
+                speakers.unset_alarm().await;
             }
         }
         let stream = stream.unwrap();
 
         if let Some(time) = parse_http(stream) {
             println!("Schedule new alarm for {}", &time);
-            let config = config::Config::new(&settings.config_file);
 
-            let speakers = sonos::Sonos::new(
-                config.sonos.ips.as_slice(),
-                config.sonos.volume,
-                config.sonos.alarm,
-            )
-            .await;
             speakers.join().await;
             speakers.set_alarm(&time).await;
             let mut scheduler = AsyncScheduler::new();
@@ -96,7 +98,11 @@ fn parse_http(mut stream: TcpStream) -> Option<String> {
         }
         if req.find("time=").is_some() {
             let time = req.split_once('=').unwrap().1.split_once(' ').unwrap().0;
-            return Some(time.to_string());
+            return if time.len() > 0 {
+                Some(time.to_string())
+            } else {
+                None
+            };
         }
     }
     None

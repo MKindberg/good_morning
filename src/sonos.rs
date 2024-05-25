@@ -52,6 +52,33 @@ impl Sonos {
             .await
             .expect("Failed to set alarm");
     }
+    pub async fn unset_alarm(&self) {
+        let service = URN::service("schemas-upnp-org", "AlarmClock", 1);
+        let aaction = "UpdateAlarm";
+        let args = format!(
+            "<ID>375</ID>
+<StartLocalTime>11:00:00</StartLocalTime>
+<Duration></Duration>
+<Recurrence>ONCE</Recurrence>
+<Enabled>0</Enabled>
+<RoomUUID>{}</RoomUUID>
+<ProgramURI>{}</ProgramURI>
+<ProgramMetaData>{}</ProgramMetaData>
+<PlayMode>SHUFFLE</PlayMode>
+<Volume>{}</Volume>
+<IncludeLinkedZones>1</IncludeLinkedZones>
+",
+            self.alarm_data.room_uuid,
+            self.alarm_data.program_uri,
+            self.alarm_data.program_meta_data,
+            self.volume
+        );
+        self.speakers[0]
+            .speaker
+            .action(&service, aaction, &args)
+            .await
+            .expect("Failed to set alarm");
+    }
 
     pub async fn play(&self) {
         for speaker in &self.speakers {
@@ -66,7 +93,11 @@ impl Sonos {
 
     pub async fn set_volume(&self) {
         for speaker in &self.speakers {
-            speaker.speaker.set_volume(self.volume).await.expect("Failed to set volume");
+            speaker
+                .speaker
+                .set_volume(self.volume)
+                .await
+                .expect("Failed to set volume");
         }
     }
 
