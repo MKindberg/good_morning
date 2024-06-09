@@ -13,9 +13,11 @@ impl Sonos {
         let mut speakers = Vec::new();
         for ip in ips {
             let ip = Ipv4Addr::from_str(ip).expect("Failed to parse sonos IP");
-            let s = Speaker::new(ip).await;
-            println!("Connected to {}", s.name);
-            speakers.push(s);
+            let speaker = Speaker::new(ip).await;
+            if let Some(s) = speaker {
+                println!("Connected to {}", s.name);
+                speakers.push(s);
+            }
         }
         Sonos {
             speakers,
@@ -121,9 +123,9 @@ struct Speaker {
 }
 
 impl Speaker {
-    async fn new(ip: Ipv4Addr) -> Speaker {
-        let speaker = sonor::Speaker::from_ip(ip).await.unwrap().unwrap();
+    async fn new(ip: Ipv4Addr) -> Option<Speaker> {
+        let speaker = sonor::Speaker::from_ip(ip).await.unwrap_or(None)?;
         let name = speaker.name().await.unwrap();
-        Speaker { speaker, name }
+        Some(Speaker { speaker, name })
     }
 }
